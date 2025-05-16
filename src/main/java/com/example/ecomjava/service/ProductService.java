@@ -22,4 +22,6 @@ public interface ProductService {
     Long getCountByProductIdAndUserId(Long productId, Long userId);
 
     Long getCountByUserId(Long userId);
+
+    List<ProductDTO> getCartDetail(Long userId);
 }

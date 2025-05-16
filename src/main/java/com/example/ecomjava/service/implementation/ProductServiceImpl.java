@@ -19,8 +19,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -119,6 +121,22 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Long getCountByUserId(Long userId) {
         return addToCartRepository.countByUserId(userId);
+    }
+
+    @Override
+    public List<ProductDTO> getCartDetail(Long userId) {
+        List<AddToCart> cartList = addToCartRepository.findByUserId(userId);
+        List<ProductEntity> productList = productRepository.findAllById(cartList.stream().map(AddToCart::getProductId).collect(Collectors.toList()));
+        List<ProductDTO> productDTOList = new ArrayList<>();
+        productList.forEach(productEntity -> {
+            ProductDTO productDTO = ProductDTO.getEntity(productEntity);
+            cartList.stream()
+                    .filter(cart -> cart.getProductId().equals(productEntity.getProductId()))
+                    .findFirst()
+                    .ifPresent(cart -> productDTO.setCartQty(cart.getQuantity()));
+            productDTOList.add(productDTO);
+        });
+        return productDTOList.isEmpty() ? null: productDTOList;
     }
 
 

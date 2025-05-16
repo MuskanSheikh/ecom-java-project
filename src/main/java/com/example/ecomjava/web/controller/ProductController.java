@@ -1,5 +1,6 @@
 package com.example.ecomjava.web.controller;
 
+import com.example.ecomjava.config.SecurityUtils;
 import com.example.ecomjava.entity.CategoryEntity;
 import com.example.ecomjava.entity.ProductEntity;
 import com.example.ecomjava.service.ProductService;
@@ -60,15 +61,25 @@ public class ProductController {
 
     @GetMapping("/get-product-count")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN_USER')")
-    public ResponseEntity<?> getProductQtyCount(@RequestParam("productId") Long productId, @RequestParam("userId") Long userId){
+    public ResponseEntity<?> getProductQtyCount(@RequestParam("productId") Long productId){
+        Long userId = SecurityUtils.getCurrentUserId();
         Long count = productService.getCountByProductIdAndUserId(productId,userId);
         return ResponseEntity.ok(Map.of("count",count != null ? count : 0));
     }
 
     @GetMapping("/get-cart-count")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN_USER')")
-    public ResponseEntity<?> getCartQtyCount(@RequestParam("userId") Long userId){
+    public ResponseEntity<?> getCartQtyCount(){
+        Long userId = SecurityUtils.getCurrentUserId();
         Long count = productService.getCountByUserId(userId);
         return ResponseEntity.ok(Map.of("count",count != null ? count : 0));
     }
+
+    @GetMapping("/cart-detail")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN_USER')")
+    public ResponseEntity<?> getCartDetail(){
+        Long userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(productService.getCartDetail(userId));
+    }
+
 }

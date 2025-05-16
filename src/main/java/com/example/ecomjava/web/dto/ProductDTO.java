@@ -23,6 +23,8 @@ public class ProductDTO {
 
     private String fileName;
 
+    private Long cartQty;
+
 
     public static ProductDTO getEntity(ProductEntity productEntity) {
         ProductDTO productDTO = new ProductDTO();

@@ -1,5 +1,6 @@
 package com.example.ecomjava.web.controller;
 
+import com.example.ecomjava.config.SecurityUtils;
 import com.example.ecomjava.entity.UserEntity;
 import com.example.ecomjava.service.UserEntityService;
 import com.example.ecomjava.web.dto.UserDTO;
@@ -27,9 +28,10 @@ public class UserController {
         }
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/get")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN_USER')")
-    public ResponseEntity<?> getUser(@PathVariable Long id){
+    public ResponseEntity<?> getUser(){
+        Long id = SecurityUtils.getCurrentUserId();
         UserDTO response = userEntityService.getById(id);
         if(response != null){
             response.setPassword("");
