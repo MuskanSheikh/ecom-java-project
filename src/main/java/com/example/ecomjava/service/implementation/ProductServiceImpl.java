@@ -139,5 +139,38 @@ public class ProductServiceImpl implements ProductService {
         return productDTOList.isEmpty() ? null: productDTOList;
     }
 
+    @Override
+    public int removeFromCart(Long userId, Long productId) {
+        return addToCartRepository.deleteByProductIdAndUserId(productId,userId);
+    }
+
+    @Override
+    public boolean checkoutCart(Long productId, Long qty,Long userId,String type) {
+        if(type.equalsIgnoreCase("checkout")){
+            Optional<AddToCart> cartOptional = addToCartRepository.findByProductIdAndUserId(productId, userId);
+            if(cartOptional.isPresent()){
+                cartOptional.get().setQuantity(qty);
+                addToCartRepository.save(cartOptional.get());
+            }
+            return true;
+        }else{
+            int i = addToCartRepository.deleteByProductIdAndUserId(productId, userId);
+            Optional<ProductEntity> productEntityOptional = productRepository.findByProductId(productId);
+            if(productEntityOptional.isPresent()){
+                ProductEntity product = productEntityOptional.get();
+                long currentQty = product.getQuantity();
+
+                if (qty > currentQty) {
+                    return false;
+                }
+                product.setQuantity(currentQty - qty);
+                productRepository.save(product);
+
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 }

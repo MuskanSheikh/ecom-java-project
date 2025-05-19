@@ -80,6 +80,43 @@ public class ProductController {
     public ResponseEntity<?> getCartDetail(){
         Long userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(productService.getCartDetail(userId));
+
+    }
+
+    @PostMapping("/remove-item")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN_USER')")
+    public ResponseEntity<?> removeProductFromCart(@RequestParam("productId") Long productId){
+        Long userId = SecurityUtils.getCurrentUserId();
+        int result = productService.removeFromCart(userId,productId);
+        if(result == 1){
+            return ResponseEntity.ok(Map.of("status", result, "message", "product removed"));
+        }else{
+            return ResponseEntity.ok(Map.of("status", result, "message", "Fail to removed product"));
+        }
+    }
+
+//    @PostMapping("/checkout")
+//    @PreAuthorize("hasRole('USER') or hasRole('ADMIN_USER')")
+//    public ResponseEntity<?> updateCartQty(@RequestParam("productId") Long productId,@RequestParam("qty") Long qty){
+//        Long userId = SecurityUtils.getCurrentUserId();
+//        boolean result = productService.updateCartQtyOnCheckout(productId, qty, userId);
+//        if(result){
+//            return ResponseEntity.ok(Map.of("status", result, "message", "success"));
+//        }else{
+//            return ResponseEntity.ok(Map.of("status", result, "message", "fail to checkout cart"));
+//        }
+//    }
+
+    @PostMapping("/checkout")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN_USER')")
+    public ResponseEntity<?> checkout(@RequestParam("productId") Long productId,@RequestParam("qty") Long qty,@RequestParam("type") String type){
+        Long userId = SecurityUtils.getCurrentUserId();
+        boolean result = productService.checkoutCart(productId, qty, userId,type);
+        if(result){
+            return ResponseEntity.ok(Map.of("status", result, "message", "success"));
+        }else{
+            return ResponseEntity.ok(Map.of("status", result, "message", "fail to checkout cart"));
+        }
     }
 
 }

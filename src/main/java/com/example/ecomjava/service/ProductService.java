@@ -24,4 +24,8 @@ public interface ProductService {
     Long getCountByUserId(Long userId);
 
     List<ProductDTO> getCartDetail(Long userId);
+
+    int removeFromCart(Long userId, Long productId);
+
+    boolean checkoutCart(Long productId, Long qty,Long userId,String type);
 }

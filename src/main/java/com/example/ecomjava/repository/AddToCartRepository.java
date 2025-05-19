@@ -1,11 +1,12 @@
 package com.example.ecomjava.repository;
 
 import com.example.ecomjava.entity.AddToCart;
+import jakarta.transaction.Transactional;
 import jdk.jfr.Registered;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.w3c.dom.stylesheets.LinkStyle;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,4 +22,9 @@ public interface AddToCartRepository extends JpaRepository<AddToCart, Integer> {
     Long getCountByProductIdAndUserId(@Param("productId")Long productId,@Param("userId") Long userId);
 
     List<AddToCart> findByUserId(Long userId);
+
+    @Modifying
+    @Transactional
+    int deleteByProductIdAndUserId(Long productId, Long userId);
+
 }
