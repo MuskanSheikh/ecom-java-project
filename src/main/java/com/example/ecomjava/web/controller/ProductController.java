@@ -5,11 +5,16 @@ import com.example.ecomjava.entity.CategoryEntity;
 import com.example.ecomjava.entity.ProductEntity;
 import com.example.ecomjava.service.ProductService;
 import com.example.ecomjava.web.dto.AddToCartDTO;
+import com.example.ecomjava.web.dto.PaginationResponseDTO;
 import com.example.ecomjava.web.dto.ProductDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,11 +44,20 @@ public class ProductController {
         return ResponseEntity.ok(categoryEntityList);
     }
 
-    @GetMapping("/get-product-list")
+    @PostMapping("/get-product-list")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> getProductList() {
-        List<ProductEntity> productEntityList = productService.getProductList();
-        return ResponseEntity.ok(productEntityList);
+    public ResponseEntity<?> getProductList(@RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(defaultValue = "10") int size) {
+            Page<ProductEntity> productPage = productService.getPaginatedProductList(page, size);
+
+            PaginationResponseDTO<ProductEntity> response = new PaginationResponseDTO<>(
+                    productPage.getContent(),
+                    productPage.getNumber(),
+                    productPage.getTotalPages(),
+                    productPage.getTotalElements()
+            );
+
+            return ResponseEntity.ok(response);
     }
 
     @PostMapping("/add-to-cart")
@@ -52,6 +66,7 @@ public class ProductController {
         Long productCount = productService.addToCart(addToCartDTO);
         return ResponseEntity.ok(Map.of("productCount",productCount));
     }
+
     @GetMapping("/get-by-id/{productId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN_USER')")
     public ResponseEntity<?> getByProductId(@PathVariable("productId") Long productId){
@@ -94,18 +109,6 @@ public class ProductController {
             return ResponseEntity.ok(Map.of("status", result, "message", "Fail to removed product"));
         }
     }
-
-//    @PostMapping("/checkout")
-//    @PreAuthorize("hasRole('USER') or hasRole('ADMIN_USER')")
-//    public ResponseEntity<?> updateCartQty(@RequestParam("productId") Long productId,@RequestParam("qty") Long qty){
-//        Long userId = SecurityUtils.getCurrentUserId();
-//        boolean result = productService.updateCartQtyOnCheckout(productId, qty, userId);
-//        if(result){
-//            return ResponseEntity.ok(Map.of("status", result, "message", "success"));
-//        }else{
-//            return ResponseEntity.ok(Map.of("status", result, "message", "fail to checkout cart"));
-//        }
-//    }
 
     @PostMapping("/checkout")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN_USER')")

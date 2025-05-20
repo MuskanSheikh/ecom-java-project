@@ -1,5 +1,6 @@
 package com.example.ecomjava.service.implementation;
 
+import com.example.ecomjava.common.Constant;
 import com.example.ecomjava.entity.AddToCart;
 import com.example.ecomjava.entity.CategoryEntity;
 import com.example.ecomjava.entity.ProductEntity;
@@ -10,6 +11,10 @@ import com.example.ecomjava.web.dto.AddToCartDTO;
 import com.example.ecomjava.web.dto.ProductDTO;
 import com.example.ecomjava.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -74,13 +79,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductEntity> getProductList() {
-        return productRepository.findAll();
-    }
-
-    @Override
     public Long addToCart(AddToCartDTO addToCartDTO) {
-        Optional<AddToCart> addToCartOptional = addToCartRepository.findByProductIdAndUserId(addToCartDTO.getProductId(),addToCartDTO.getUserId());
+        Optional<AddToCart> addToCartOptional = addToCartRepository.findByProductIdAndUserIdAndStatus(addToCartDTO.getProductId(),addToCartDTO.getUserId(),Constant.ADDED_TO_CART);
         AddToCart addToCart;
         if(addToCartOptional.isPresent()){
             addToCart = addToCartOptional.get();
@@ -90,11 +90,12 @@ public class ProductServiceImpl implements ProductService {
                     .productId(addToCartDTO.getProductId())
                     .userId(addToCartDTO.getUserId())
                     .quantity(addToCartDTO.getQuantity())
+                    .status(Constant.ADDED_TO_CART)
                     .isDeleted(0).build();
         }
             addToCartRepository.save(addToCart);
 
-        Long count = addToCartRepository.countByUserId(addToCart.getUserId());
+        Long count = addToCartRepository.countByUserIdAndStatus(addToCart.getUserId(),Constant.ADDED_TO_CART);
         return count;
     }
 
@@ -110,7 +111,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Long getCountByProductIdAndUserId(Long productId, Long userId) {
-        Optional<AddToCart> addToCartOptional = addToCartRepository.findByProductIdAndUserId(productId,userId);
+        Optional<AddToCart> addToCartOptional = addToCartRepository.findByProductIdAndUserIdAndStatus(productId,userId,Constant.ADDED_TO_CART);
         Long count = 0L;
         if(addToCartOptional.isPresent()){
             count = addToCartOptional.get().getQuantity();
@@ -120,12 +121,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Long getCountByUserId(Long userId) {
-        return addToCartRepository.countByUserId(userId);
+        return addToCartRepository.countByUserIdAndStatus(userId,Constant.ADDED_TO_CART);
     }
 
     @Override
     public List<ProductDTO> getCartDetail(Long userId) {
-        List<AddToCart> cartList = addToCartRepository.findByUserId(userId);
+        List<AddToCart> cartList = addToCartRepository.findByUserIdAndStatus(userId,Constant.ADDED_TO_CART);
         List<ProductEntity> productList = productRepository.findAllById(cartList.stream().map(AddToCart::getProductId).collect(Collectors.toList()));
         List<ProductDTO> productDTOList = new ArrayList<>();
         productList.forEach(productEntity -> {
@@ -147,14 +148,18 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public boolean checkoutCart(Long productId, Long qty,Long userId,String type) {
         if(type.equalsIgnoreCase("checkout")){
-            Optional<AddToCart> cartOptional = addToCartRepository.findByProductIdAndUserId(productId, userId);
+            Optional<AddToCart> cartOptional = addToCartRepository.findByProductIdAndUserIdAndStatus(productId, userId,Constant.ADDED_TO_CART);
             if(cartOptional.isPresent()){
                 cartOptional.get().setQuantity(qty);
                 addToCartRepository.save(cartOptional.get());
             }
             return true;
         }else{
-            int i = addToCartRepository.deleteByProductIdAndUserId(productId, userId);
+            Optional<AddToCart> cartOptional = addToCartRepository.findByProductIdAndUserIdAndStatus(productId, userId,Constant.ADDED_TO_CART);
+            if(cartOptional.isPresent()){
+                cartOptional.get().setStatus(Constant.CONFIRMED);
+                addToCartRepository.save(cartOptional.get());
+            }
             Optional<ProductEntity> productEntityOptional = productRepository.findByProductId(productId);
             if(productEntityOptional.isPresent()){
                 ProductEntity product = productEntityOptional.get();
@@ -172,5 +177,9 @@ public class ProductServiceImpl implements ProductService {
         return false;
     }
 
-
+    @Override
+    public Page<ProductEntity> getPaginatedProductList(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("productId").descending());
+        return productRepository.findAllByIsDeleted(pageable,0);
+    }
 }

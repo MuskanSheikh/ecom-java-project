@@ -23,16 +23,16 @@ public class ProductEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "quantity")
+    @Column(name = "quantity", columnDefinition = "BIGINT default 0 ")
     private Long quantity;
 
-    @Column(name = "old_price")
+    @Column(name = "old_price", columnDefinition = "BIGINT default 0 ")
     private int oldPrice;
 
-    @Column(name = "new_price")
+    @Column(name = "new_price", columnDefinition = "BIGINT default 0 ")
     private int newPrice;
 
-    @Column(name = "category_id")
+    @Column(name = "category_id", columnDefinition = "BIGINT default 0 ")
     private String categoryId;
 
     @Column(name="image_url")
@@ -40,4 +40,7 @@ public class ProductEntity {
 
     @Column(name="file_name")
     private String fileName;
+
+    @Column(name="is_deleted", columnDefinition = "INT default 0 ")
+    private int isDeleted;
 }

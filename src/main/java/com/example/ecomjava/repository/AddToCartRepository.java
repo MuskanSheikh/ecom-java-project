@@ -13,15 +13,15 @@ import java.util.Optional;
 
 @Registered
 public interface AddToCartRepository extends JpaRepository<AddToCart, Integer> {
-    @Query(value = "select count(*) from add_to_cart where user_id = :userId", nativeQuery = true)
-    Long countByUserId(@Param("userId") Long userId);
+    @Query(value = "select coalesce(count(*), 0) from add_to_cart where user_id = :userId and lower(status) = lower(:status)", nativeQuery = true)
+    Long countByUserIdAndStatus(@Param("userId") Long userId,@Param("status") String status);
 
-    Optional<AddToCart> findByProductIdAndUserId(Long productId, Long userId);
+    Optional<AddToCart> findByProductIdAndUserIdAndStatus(Long productId, Long userId,String status);
 
-    @Query(value = "select count(*) from add_to_cart atc where atc.product_id = :productId and user_id = :userId", nativeQuery = true)
-    Long getCountByProductIdAndUserId(@Param("productId")Long productId,@Param("userId") Long userId);
+//    @Query(value = "select count(*) from add_to_cart atc where atc.product_id = :productId and user_id = :userId", nativeQuery = true)
+//    Long getCountByProductIdAndUserId(@Param("productId")Long productId,@Param("userId") Long userId);
 
-    List<AddToCart> findByUserId(Long userId);
+    List<AddToCart> findByUserIdAndStatus(Long userId,String status);
 
     @Modifying
     @Transactional

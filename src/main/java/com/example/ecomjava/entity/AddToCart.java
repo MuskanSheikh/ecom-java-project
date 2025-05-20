@@ -26,6 +26,9 @@ public class AddToCart {
     @Column(name = "quantity", columnDefinition = "BIGINT default 0 ")
     private Long quantity;
 
-    @Column(name = "is_deleted")
+    @Column(name = "is_deleted",columnDefinition = "INT default 0 ")
     private int isDeleted;
+
+    @Column(name="status",columnDefinition = "INT default 0 ")
+    private String status;
 }
