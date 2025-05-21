@@ -44,11 +44,11 @@ public class ProductController {
         return ResponseEntity.ok(categoryEntityList);
     }
 
-    @PostMapping("/get-product-list")
+    @GetMapping("/get-product-list")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getProductList(@RequestParam(defaultValue = "0") int page,
-                                            @RequestParam(defaultValue = "10") int size) {
-            Page<ProductEntity> productPage = productService.getPaginatedProductList(page, size);
+                                            @RequestParam(defaultValue = "10") int size,@RequestParam(required = false) Long categoryId) {
+            Page<ProductEntity> productPage = productService.getPaginatedProductList(page, size,categoryId);
 
             PaginationResponseDTO<ProductEntity> response = new PaginationResponseDTO<>(
                     productPage.getContent(),

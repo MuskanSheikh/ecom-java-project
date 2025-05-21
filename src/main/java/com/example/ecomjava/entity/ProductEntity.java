@@ -33,7 +33,7 @@ public class ProductEntity {
     private int newPrice;
 
     @Column(name = "category_id", columnDefinition = "BIGINT default 0 ")
-    private String categoryId;
+    private Long categoryId;
 
     @Column(name="image_url")
     private String imageUrl;

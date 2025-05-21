@@ -178,8 +178,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductEntity> getPaginatedProductList(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("productId").descending());
-        return productRepository.findAllByIsDeleted(pageable,0);
+    public Page<ProductEntity> getPaginatedProductList(int page, int size,Long category) {
+        Pageable pageable = PageRequest.of(page, size);
+        if (category != null) {
+            return productRepository.findAllByIsDeletedAndCategoryIgnoreCase(pageable, 0, category);
+        } else {
+            return productRepository.findAllByIsDeleted(pageable, 0);
+        }
     }
 }

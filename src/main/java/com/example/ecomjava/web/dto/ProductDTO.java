@@ -19,7 +19,7 @@ public class ProductDTO {
 
     private int newPrice;
 
-    private String categoryId;
+    private Long categoryId;
 
     private String fileName;
 
