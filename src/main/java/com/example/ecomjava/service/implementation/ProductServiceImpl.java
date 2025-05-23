@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -178,10 +177,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductEntity> getPaginatedProductList(int page, int size,Long category) {
+    public Page<ProductEntity> getPaginatedProductList(int page, int size,Long category,String search) {
         Pageable pageable = PageRequest.of(page, size);
         if (category != null) {
-            return productRepository.findAllByIsDeletedAndCategoryIgnoreCase(pageable, 0, category);
+            return productRepository.getAllByIsDeletedAndCategoryId(pageable, 0, category,search);
         } else {
             return productRepository.findAllByIsDeleted(pageable, 0);
         }

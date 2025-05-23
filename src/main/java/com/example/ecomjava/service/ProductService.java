@@ -28,5 +28,5 @@ public interface ProductService {
 
     boolean checkoutCart(Long productId, Long qty,Long userId,String type);
 
-    Page<ProductEntity> getPaginatedProductList(int page, int size,Long category);
+    Page<ProductEntity> getPaginatedProductList(int page, int size,Long category,String search);
 }

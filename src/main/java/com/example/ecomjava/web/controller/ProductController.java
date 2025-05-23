@@ -47,8 +47,9 @@ public class ProductController {
     @GetMapping("/get-product-list")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getProductList(@RequestParam(defaultValue = "0") int page,
-                                            @RequestParam(defaultValue = "10") int size,@RequestParam(required = false) Long categoryId) {
-            Page<ProductEntity> productPage = productService.getPaginatedProductList(page, size,categoryId);
+                                            @RequestParam(defaultValue = "10") int size,@RequestParam(required = false) Long categoryId,
+                                            @RequestParam(required = false) String search) {
+            Page<ProductEntity> productPage = productService.getPaginatedProductList(page, size,categoryId,search);
 
             PaginationResponseDTO<ProductEntity> response = new PaginationResponseDTO<>(
                     productPage.getContent(),
